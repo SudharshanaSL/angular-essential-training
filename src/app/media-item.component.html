@@ -1,5 +1,10 @@
-<h2>The Redemption</h2>
-<div>Watched on 1/13/2016</div>
+<h2>Interpolation: {{name}}</h2>
+<div>Watched: {{wasWatched()}}</div>
+<div [textContent]="'Property Binding'"></div>
+<div [textContent]="name + name"></div>
+Interpolation will be required when square brackets are not used
+<div textContent="Property Binding"></div>
+<div textContent="{{name + name}}"></div>
 <div>Action</div>
 <div>2016</div>
 <div class="tools">
