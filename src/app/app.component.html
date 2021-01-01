@@ -3,5 +3,13 @@
     <h1>Media Watch List</h1>
     <p class="description">Keeping track of the media I want to watch.</p>
   </header>
-  <mw-media-item></mw-media-item>
+  <!--
+    mediaItem is binding target
+    firstMediaItem is binding source
+
+    angular will first try to identify matching DOM property on the element (tag), and then proceed to identify a
+    property decorated by the input decorator with matching name in the element, and then proceed to identify a
+    directive applicable for the element
+  -->
+  <mw-media-item [mediaItem]="firstMediaItem" [mediaItemToWatch]="nothing"></mw-media-item>
 </section>

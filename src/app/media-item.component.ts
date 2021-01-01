@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'mw-media-item',
@@ -6,6 +6,12 @@ import { Component } from '@angular/core';
   styleUrls: ['./media-item.component.css']
 })
 export class MediaItemComponent {
+
+  // by default property name is referred for input binding name while instantiating component
+  @Input() mediaItem;
+  // bad practice to have mismatching names
+  @Input('mediaItemToWatch') toWatch;
+
   onDelete() {
     console.log('deleted');
   }
