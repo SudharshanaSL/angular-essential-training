@@ -1,5 +1,13 @@
 <h2>{{ mediaItem.name }}</h2>
-<div>Watched on {{ mediaItem.watchedOn }}</div>
+
+<!--
+  So ng-template is never rendered in the view during component template parsing.
+  If we use the syntactic sugar of structural directives, we can void writing ng-template
+  We can directly have ngIf on the div
+-->
+<ng-template *ngIf="mediaItem.watchedOn">
+  <div>Watched on {{ mediaItem.watchedOn }}</div>
+</ng-template>
 <div>{{ mediaItem.category }}</div>
 <div>{{ mediaItem.year }}</div>
 <div class="tools">
