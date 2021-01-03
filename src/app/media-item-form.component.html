@@ -15,6 +15,12 @@
     <li>
       <label for="name">Name</label>
       <input type="text" name="name" id="name" formControlName="name">
+    <!--
+      angular will add errors property to FormControl or FormGroup or FormArray object
+    -->
+      <div *ngIf="form.get('name').hasError('pattern')" class="error">
+        Invalid characters
+      </div>
     </li>
     <li>
       <label for="category">Category</label>
@@ -27,9 +33,18 @@
         <option value="Romance">Romance</option>
       </select>
     </li>
+    <!--
+      angular will add errors property to FormControl or FormGroup or FormArray object
+    -->
     <li>
       <label for="year">Year</label>
       <input type="text" name="year" id="year" maxlength="4" formControlName="year">
+      <!--
+        yearErrors will be created if ngIf evaluates to truthy
+      -->
+      <div *ngIf="form.get('year').errors as yearErrors" class="error">
+        Must be between {{yearErrors.year.min}} and {{yearErrors.year.max}}
+      </div>
     </li>
   </ul>
   <button type="submit" [disabled]="!form.valid">Save</button>
