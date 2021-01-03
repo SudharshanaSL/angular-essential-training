@@ -22,9 +22,6 @@ import { MediaItemService } from './media-item.service';
     CategoryListPipe,
     MediaItemFormComponent
   ],
-  providers: [
-    MediaItemService
-  ],
   bootstrap: [
     AppComponent
   ]

@@ -1,3 +1,12 @@
+import { Injectable } from "@angular/core";
+
+@Injectable({
+  // single instance in root injector will be available to all components
+  // preferred because:
+  // keeps registration logic near service
+  // will also help angular compiler to optimize to instantiate this only if request in any other class constructor
+  providedIn: "root"
+})
 export class MediaItemService {
   mediaItems = [
     {
