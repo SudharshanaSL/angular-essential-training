@@ -14,6 +14,10 @@
     </li>
     <li>
       <label for="name">Name</label>
+      <!--
+        even if validator is registered for this form control,
+        submit button will still be enabled for invalid values
+      -->
       <input type="text" name="name" id="name" formControlName="name">
     </li>
     <li>
@@ -32,5 +36,8 @@
       <input type="text" name="year" id="year" maxlength="4" formControlName="year">
     </li>
   </ul>
-  <button type="submit">Save</button>
+  <!--
+    button should be disabled when form is valid
+  -->
+  <button type="submit" [disabled]="!form.valid">Save</button>
 </form>
