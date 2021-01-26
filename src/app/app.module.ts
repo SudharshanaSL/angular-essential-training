@@ -8,11 +8,14 @@ import { FavoriteDirective } from './favorite.directive';
 import { CategoryListPipe } from './category-list.pipe';
 import { MediaItemFormComponent } from './media-item-form.component';
 import { lookupListToken, lookupLists } from './providers';
+import { HttpXhrBackend } from '@angular/common/http';
+import { MockXHRBackend } from './mock-xhr-backend';
 
 @NgModule({
   imports: [
     BrowserModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    HttpXhrBackend
   ],
   declarations: [
     AppComponent,
@@ -23,10 +26,11 @@ import { lookupListToken, lookupLists } from './providers';
     MediaItemFormComponent
   ],
   providers: [
-    { provide: lookupListToken, useValue: lookupLists }
+    { provide: lookupListToken, useValue: lookupLists },
+    { provide: HttpXhrBackend, useClass: MockXHRBackend }
   ],
   bootstrap: [
     AppComponent
   ]
 })
-export class AppModule {}
+export class AppModule { }
