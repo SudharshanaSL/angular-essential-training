@@ -48,6 +48,8 @@ export class MediaItemFormComponent implements OnInit {
   }
 
   onSubmit(mediaItem) {
-    this.mediaItemService.add(mediaItem);
+    // since form component addition does not let know list component of newest addition
+    // it will not show up the latest addition
+    this.mediaItemService.add(mediaItem).subscribe();
   }
 }
