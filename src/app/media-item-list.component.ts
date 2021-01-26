@@ -9,10 +9,16 @@ import { MediaItemService } from './media-item.service';
 export class MediaItemListComponent implements OnInit {
   mediaItems;
 
-  constructor(private mediaItemService: MediaItemService) {}
+  constructor(private mediaItemService: MediaItemService) { }
 
   ngOnInit() {
-    this.mediaItems = this.mediaItemService.get();
+    // get returns observable so need to subscribe to get the data
+    this.mediaItemService.get()
+      .subscribe((mediaItems => {
+        this.mediaItems = mediaItems;
+      }));
+    // subscribe takes in 3 function callbacks
+    // - next, error, complete based on event types
   }
 
   onMediaItemDelete(mediaItem) {

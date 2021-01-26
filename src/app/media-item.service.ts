@@ -1,56 +1,23 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MediaItemService {
-  mediaItems = [
-    {
-      id: 1,
-      name: 'Firebug',
-      medium: 'Series',
-      category: 'Science Fiction',
-      year: 2010,
-      watchedOn: 1294166565384,
-      isFavorite: false
-    },
-    {
-      id: 2,
-      name: 'The Small Tall',
-      medium: 'Movies',
-      category: 'Comedy',
-      year: 2015,
-      watchedOn: null,
-      isFavorite: true
-    }, {
-      id: 3,
-      name: 'The Redemption',
-      medium: 'Movies',
-      category: 'Action',
-      year: 2016,
-      watchedOn: null,
-      isFavorite: false
-    }, {
-      id: 4,
-      name: 'Hoopers',
-      medium: 'Series',
-      category: 'Drama',
-      year: null,
-      watchedOn: null,
-      isFavorite: true
-    }, {
-      id: 5,
-      name: 'Happy Joe: Cheery Road',
-      medium: 'Movies',
-      category: 'Action',
-      year: 2015,
-      watchedOn: 1457166565384,
-      isFavorite: false
-    }
-  ];
+  mediaItems = [];
+
+  constructor(private http: HttpClient) { }
 
   get() {
-    return this.mediaItems;
+    // since we do not want to return http response objects returned by backend
+    // we need to pipe and map the response using arrow function
+    // we also need to declare what kind of object we are returning to avoid error in editor
+    return this.http.get<MediaItemResponse>('mediaitems')
+      .pipe(map(response => {
+        return response.mediaItems;
+      }));
   }
 
   add(mediaItem) {
@@ -63,4 +30,18 @@ export class MediaItemService {
       this.mediaItems.splice(index, 1);
     }
   }
+}
+
+interface MediaItem {
+  id: number;
+  name: string;
+  medium: string;
+  category: string;
+  year: number;
+  watchedOn: number;
+  isFavorite: boolean;
+}
+
+interface MediaItemResponse {
+  mediaItems: MediaItem[];
 }
