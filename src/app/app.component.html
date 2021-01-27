@@ -1,8 +1,21 @@
+<nav>
+  <a>
+    <img src="assets/04.png" class="icon" />
+  </a>
+  <a>
+    <img src="assets/03.png" class="icon" />
+  </a>
+  <a>
+    <img src="assets/02.png" class="icon" />
+  </a>
+</nav>
 <section>
   <header>
     <h1>Media Watch List</h1>
     <p class="description">Keeping track of the media I want to watch.</p>
   </header>
-  <mw-media-item-form></mw-media-item-form>
-  <mw-media-item-list></mw-media-item-list>
+  <!-- router-outlet structural directive will let angular know 
+    what elements to render based on route -->
+  <router-outlet></router-outlet>
+  <!--matched components are rendered as sibling to router-outlet-->
 </section>
