@@ -1,0 +1,808 @@
+data binding:
+h2>Interpolation: {{name}}</h2>
+<div>Watched on 1/13/2016</div>
+<div>Watched: {{wasWatched()}}</div>
+<div [textContent]="'Property Binding'"></div>
+<div [textContent]="name + name"></div>
+Interpolation will be required when square brackets are not used
+<div textContent="Property Binding"></div>
+<div textContent="{{name + name}}"></div>
+
+----------------------
+
+component input binding:
+  <!--
+    mediaItem is binding target
+    firstMediaItem is binding source
+    angular will first try to identify matching DOM property on the element (tag), and then proceed to identify a
+    property decorated by the input decorator with matching name in the element, and then proceed to identify a
+    directive applicable for the element
+  -->
+  <mw-media-item [mediaItem]="firstMediaItem"
+
+----------------------
+
+Output binding
+
+  // output also allows custom naming of output properties, but it is a bad practice
+  @Output() delete= new EventEmitter();
+
+----------------------
+
+*ngIf
+
+<!--
+  So ng-template is never rendered in the view during component template parsing.
+  If we use the syntactic sugar of structural directives, we can void writing ng-template
+  We can directly have ngIf on the div
+  can also be set as [ngIf]
+-->
+<ng-template *ngIf="mediaItem.watchedOn">
+  <div>Watched on {{ mediaItem.watchedOn }}</div>
+</ng-template>
+
+----------------------
+
+ngFor
+
+  <!--
+    mw-media-item elements get repeated.
+    ngFor expects microsyntax
+    let item of items
+  -->
+  <mw-media-item *ngFor="let mediaItem of mediaItems"
+    [mediaItem]="mediaItem"
+
+----------------------
+
+   [ngClass]="{'medium-movies': mediaItem.medium === 'Movies', 'medium-series': mediaItem.medium === 'Series'}"
+
+----------------------
+
+
+Create directive:
+
+@Directive({
+    // recommended to use domain prefix on selectors
+    // even if angular prefixes by ng
+    selector: '[mwFavorite]'
+})
+export class FavoriteDirective {
+    // binds host element property to a directive property
+    @HostBinding('class.is-favorite') isFavorite = true;
+}
+
+
+next:
+use as property in html
+declare this in module
+
+----------------------
+
+directive input:
+
+<!--
+    tell angular that target expression needs to be evaluated by enclosing in square brackets
+  -->
+  <svg
+    [mwFavorite]="mediaItem.isFavorite"
+    class="favorite" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M12 9.229c.234-1.12 1.547-6.229 5.382-6.229 2.22 0 4.618 1.551 4.618 5.003 0 3.907-3.627 8.47-10 12.629-6.373-4.159-10-8.722-10-12.629 0-3.484 2.369-5.005 4.577-5.005 3.923 0 5.145 5.126 5.423 6.231zm-12-1.226c0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-7.962-9.648-9.028-12-3.737-2.338-5.262-12-4.27-12 3.737z"
+    />
+  </svg>
+  
+in directive code:
+
+  @HostBinding('class.is-favorite') isFavorite;
+
+  // @Input binding can be added to setter funcion with same name as directive selector 
+  @Input() set mwFavorite(value) {
+    this.isFavorite = value;
+  }
+
+----------------------
+
+listening to events in directives:
+
+  // directives can also be made to listen to host events
+  // angular works with native events without "on" prefix
+  @HostListener('mouseenter') onMouseEnter() {
+    this.hovering = true;
+  }
+
+  @HostListener('mouseleave') onMouseLeave() {
+    this.hovering = false;
+  }
+
+
+----------------------
+
+<!--
+  multiple parameters separated by :
+  pipes can be chained
+-->
+<h2>{{ mediaItem.name | slice: 0:10 | uppercase }}</h2>
+<ng-template [ngIf]="mediaItem.watchedOn">
+  <!--
+    single parameter
+  -->
+  <div>Watched on {{ mediaItem.watchedOn | date: 'shortDate' }}</div>
+</ng-template>
+
+----------------------
+
+for custom pipe, create class with @Pipe decorator with name metadata.
+
+If the pipe has internal state (that is, the result depends on state other than its arguments), set pure metadata to false. In this case, the pipe is invoked on each change-detection cycle, even if the arguments have not changed.
+
+declare pipe in the module
+
+----------------------
+
+angular forms bind form with form data and events
+offers handy builtin validators
+we can also apply custom and async validators
+also we can access form properties as an object
+
+2 common approaches to building forms are 
+- template driven - majority of form logic in template markup
+- model driven - majority of form logic handled in component class
+
+----------------------
+
+template driven approach
+
+- forms defined in template
+- easy to get it up and running
+- simple
+
+in module.ts
+
+    // angular will lookout for any form elements within the templates
+    // using the builtin ngForm directive, but it requires to know which are the form fields
+    // for that, we need to use the ngModel directive on the form fields
+    // otherwise the field will not be included in form group object
+    FormsModule
+
+in template
+
+  <!--
+    form submit action stitched using ngSubmit
+    #anything is template reference variables
+    angular is exporting form group object into the template reference variable below
+    form group is underlying model angular uses for a form
+  -->
+<form 
+  #mediaItemForm="ngForm"
+  (ngSubmit)="onSubmit(mediaItemForm.value)">
+  <ul>
+  <ul>
+    <li>
+    <li>
+      <label for="medium">Medium</label>
+      <label for="medium">Medium</label>
+      <select name="medium" id="medium">
+      <!--
+    // angular will lookout for any form elements within the templates
+    // using the builtin ngForm directive, but it requires to know which are the form fields
+    // for that, we need to use the ngModel directive on the form fields,
+    // otherwise the field will not be included in form group object
+      -->
+      <select name="medium" id="medium" ngModel>
+
+----------------------
+
+model driven approach or reactive approach
+
+- gives full power to do what is required
+
+big difference is form is built in components, not templates
+
+- form field contract
+- field validation rules
+- change tracking
+- ease of unit tests
+
+in module.ts
+
+imports: ReactiveFormsModule
+
+component life cycle hook ngOnInit:
+
+  ngOnInit() {
+    this.form = new FormGroup({
+      // can set default values by passing to constructor
+      medium: new FormControl('Movies'),
+      name: new FormControl(''),
+      category: new FormControl(''),
+      year: new FormControl(''),
+    });
+  }
+
+
+template:
+
+<!--
+  formGroup directive should be bound to form group object tracked in component
+-->
+<form
+  [formGroup] = form
+  (ngSubmit)="onSubmit(form.value)">
+  <ul>
+    <li>
+      <label for="medium">Medium</label>
+      <!--
+        formControlName directive should be set for the form's elements
+        with  values as names in the component's form group object 
+      -->
+      <select name="medium" id="medium" formControlName="medium">
+
+----------------------
+
+builtin and custom validators can be used for a form
+
+builtin regex validation:
+
+in component.ts
+
+
+  ngOnInit() {
+    this.form = new FormGroup({
+      medium: new FormControl('Movies'),
+      // Validators.pattern will return a regex validator function
+      // Validators.compose will validate against multiple validator functions by taking array of validators
+      name: new FormControl('', Validators.compose([
+        Validators.required,
+        // will allow only a-z A-Z 0-9 whitespace - _ /
+        Validators.pattern('[\\w\\-\\s\\/]+')
+      ])),
+      category: new FormControl(''),
+      year: new FormControl(''),
+    });
+  }
+
+
+in template
+
+      <label for="name">Name</label>
+      <!--
+        even if validator is registered for this form control,
+        submit button will still be enabled for invalid values
+      -->
+      <input type="text" name="name" id="name" formControlName="name">
+
+  <!--
+    button should be disabled when form is valid
+  -->
+  <button type="submit" [disabled]="!form.valid">Save</button>
+
+----------------------
+
+setting custom validator for form field
+
+in component
+
+  ngOnInit() {
+    this.form = new FormGroup({
+      medium: new FormControl('Movies'),
+      // Validators.pattern will return a regex validator function
+      // Validators.compose will validate against multiple validator functions by taking array of validators
+      name: new FormControl('', Validators.compose([
+        Validators.required,
+        // will allow only a-z A-Z 0-9 whitespace - _ /
+        Validators.pattern('[\\w\\-\\s\\/]+')
+      ])),
+      category: new FormControl(''),
+      // pass custom validator function reference
+      year: new FormControl('', this.yearValidator),
+    });
+  }
+
+  // custom validator function
+  yearValidator(control: FormControl) {
+    if(control.value.trim().length === 0) {
+      return null;
+    }
+    // specifies base of given number string
+    const year = parseInt(control.value, 10);
+    const minYear = 1900;
+    const maxYear = 2100;
+    if(year >= minYear && year <= maxYear) {
+      return null;
+    }
+    // below year property will be set in errors property of formGroup
+    return {
+      year: true
+    }
+  }
+
+
+----------------------
+
+error handling in forms
+
+in component
+
+
+  yearValidator(control: FormControl) {
+    if (control.value.trim().length === 0) {
+      return null;
+    }
+    const year = parseInt(control.value, 10);
+    const minYear = 1800;
+    const maxYear = 2500;
+    if (year >= minYear && year <= maxYear) {
+      return null;
+    } else {
+      return { 
+        year: {
+          min: minYear,
+          max: maxYear
+        }
+      };
+    }
+  }
+
+in template
+
+    <li>
+      <label for="name">Name</label>
+      <input type="text" name="name" id="name" formControlName="name">
+    <!--
+      angular will add errors property to FormControl or FormGroup or FormArray object
+    -->
+      <div *ngIf="form.get('name').hasError('pattern')" class="error">
+        Invalid characters
+      </div>
+    </li>
+
+    <!--
+      angular will add errors property to FormControl or FormGroup or FormArray object
+    -->
+    <li>
+      <label for="year">Year</label>
+      <input type="text" name="year" id="year" maxlength="4" formControlName="year">
+      <!--
+        yearErrors will be created if ngIf evaluates to truthy
+      -->
+      <div *ngIf="form.get('year').errors as yearErrors" class="error">
+        Must be between {{yearErrors.year.min}} and {{yearErrors.year.max}}
+      </div>
+    </li>
+
+----------------------
+
+constructor dependency injection:
+
+in component
+
+  // typescript will create property for class and set it during transpiling stage
+  // constructor dependency injection
+  constructor(private formBuilder: FormBuilder) { }
+
+  ngOnInit() {
+    this.form = this.formBuilder.group({
+      medium: this.formBuilder.control('Movies'),
+      name: this.formBuilder.control('', Validators.compose([
+        Validators.required,
+        Validators.pattern('[\\w\\-\\s\\/]+')
+      ])),
+      category: this.formBuilder.control(''),
+      year: this.formBuilder.control('', this.yearValidator),
+    });
+  }
+
+
+----------------------
+
+service can be registered in angular by including it in providers array in the module
+
+  providers: [
+    MediaItemService
+  ],
+
+or it can be made available in component tree root injector by using @Injectable decorator
+
+
+@Injectable({
+  // single instance in root injector will be available to all components
+  // preferred because:
+  // keeps registration logic near service
+  // will also help angular compiler to optimize to instantiate this only if request in any other class constructor
+  providedIn: "root"
+})
+
+----------------------
+
+to inject types into components, we can make use of string tokens for instance identification
+
+in module
+
+const lookupLists = {
+  mediums: ['Movies', 'Series']
+}
+
+
+  providers: [
+    // way to provide types for injection
+    { provide: 'lookupListToken', useValue: lookupLists }
+  ]
+
+
+in component
+
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private mediaItemService: MediaItemService,
+    @Inject('lookupListToken') public lookupLists) { }
+
+in template
+
+        <!--
+          template can access public properties of component
+        -->
+        <option *ngFor="let medium of lookupLists.mediums" [value]="medium">{{medium}}</option>
+
+
+cons:
+string literals are prone to errors and involve maintenance without supportive functionality from code editors
+
+to overcome this we can create a separate provider typescript file and tokens can be identified using InjectionToken
+
+The contents of the new providers.ts file can be simply
+
+import { InjectionToken } from "@angular/core";
+
+export const lookupListToken = new InjectionToken('lookupListToken');
+
+export const lookupLists = {
+    mediums: ['Movies', 'Series']
+  };
+
+
+and the export-ready constants can be imported in required module providers and after that the component constructors to eliminate the usage of string literals
+
+
+----------------------
+
+For working with Http calls, we can make use of HttpClientModule. We need to import in the required modules' imports section
+This includes services and types to do Http tasks
+
+----------------------
+
+We can mock backend http by implementing HttpBackend and also replace angular's default HttpXhrBackend http backend service by leveraging angular's dependency injection
+
+We just need to import HttpXhrBackend from angular/common/http and provide the mock class in backend to handle the api calls using the provider property useClass
+
+import { HttpXhrBackend } from '@angular/common/http';
+import { MockXHRBackend } from './mock-xhr-backend';
+
+@NgModule({
+  imports: [
+    BrowserModule,
+    ReactiveFormsModule,
+    HttpXhrBackend
+  ],
+  declarations: [
+    AppComponent,
+    MediaItemComponent,
+    MediaItemListComponent,
+    FavoriteDirective,
+    CategoryListPipe,
+    MediaItemFormComponent
+  ],
+  providers: [
+    { provide: lookupListToken, useValue: lookupLists },
+    { provide: HttpXhrBackend, useClass: MockXHRBackend }
+
+----------------------
+
+consuming backend api using http client in service
+
+export class MediaItemService {
+  mediaItems = [];
+
+  constructor(private http: HttpClient) { }
+
+  get() {
+    // since we do not want to return http response objects returned by backend
+    // we need to pipe and map the response using arrow function
+    // we also need to declare what kind of object we are returning to avoid error in editor
+    return this.http.get<MediaItemResponse>('mediaitems')
+      .pipe(map(response => {
+        return response.mediaItems;
+      }));
+  }
+
+}
+
+interface MediaItem {
+  id: number;
+  name: string;
+  medium: string;
+  category: string;
+  year: number;
+  watchedOn: number;
+  isFavorite: boolean;
+}
+
+interface MediaItemResponse {
+  mediaItems: MediaItem[];
+}
+
+
+making use of service in component
+
+
+  ngOnInit() {
+    // get returns observable so need to subscribe to get the data
+    this.mediaItemService.get()
+      .subscribe((mediaItems => {
+        this.mediaItems = mediaItems;
+      }));
+    // subscribe takes in 3 function callbacks
+    // - next, error, complete based on event types
+  }
+
+
+----------------------
+
+passing option params for get call, modify the service file's get function and also modify callers to pass the required params
+
+  get(medium) {
+    // passing option params for get call
+    const getOptions = {
+      params: {
+        medium
+      }
+    };
+    return this.http.get<MediaItemsResponse>('mediaitems', getOptions)
+      .pipe(
+        map((response: MediaItemsResponse) => {
+          return response.mediaItems;
+        })
+      );
+  }
+
+----------------------
+
+post and delete calls using http client
+
+in service file make changes as below
+
+  add(mediaItem) {
+    // underlying http module code will detect an object is passed and automatically set the application/json header
+    return this.http.post('mediaitems', mediaItem);
+  }
+
+  delete(mediaItem) {
+    // back ticks offer string interpolation abilities
+    return this.http.delete(`mediaitems/${mediaItem.id}`);
+  }
+}
+
+
+
+in callers, make sure that observable event is subscribed to detect success of the addition and deletion
+
+----------------------
+
+setting base href and configuring routes
+
+1. should have base href in the dom as a child of the head tag
+2. router makes use of browser's history push state for navigation and url interaction
+3. this allows for URLs to be used in the client app without actually making those remote requests
+4. client app can define the routes without having to change in backend
+
+app.routing.ts
+
+import { Routes } from '@angular/router';
+import { MediaItemFormComponent } from './media-item-form.component';
+import { MediaItemListComponent } from './media-item-list.component';
+
+const appRoutes: Routes = [
+    // order of routes is important, first match is always preferred
+    {
+        // router handles building the url with leading/forward slashes
+        path: 'add',
+        component: MediaItemFormComponent
+        // can use relative or absolute url building
+    }, {
+        // router will capture the url segment and put it in route params
+        path: ':medium',
+        component: MediaItemListComponent
+    }, {
+        // default routing path
+        path: '',
+        redirectTo: 'all',
+        // this will tell the router that path property 
+        // we are providing represents the full url and not just a part of it 
+        pathMatch: 'full'
+    }
+];
+
+
+
+
+----------------------
+
+integrate declared routes to the app
+
+router module is configured to support multiple route configurations and need not be imported for every place where declare route paths
+It has a static class method available called forRoot, which returns a module with providers. That module contains exported directives and providers and as well as a configured router intended for router module
+
+
+you have to let routing module know of the routes by invoking forRoot with array of route objects
+
+in app.routing.ts, we need to add
+
+
+// let app module know about the routes
+// forRoot expects array of route objects
+export const routing = RouterModule.forRoot(appRoutes);
+
+
+in app.module.ts, we need to import the routing module stored in routing constant
+
+import { routing } from './app.routing';
+
+@NgModule({
+  imports: [
+    BrowserModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    routing
+  ],
+
+----------------------
+
+router-outlet usage
+
+  <!-- router-outlet structural directive will let angular know 
+    what elements to render based on route -->
+  <router-outlet></router-outlet>
+  <!--matched components are rendered as sibling to router-outlet-->
+
+use above in DOM
+
+----------------------
+
+routerLink directive can be 
+  <a routerLink="/Series">
+    <img src="assets/02.png" class="icon" />
+  </a>
+
+----------------------
+
+using query params
+
+angular provides a way to get information about currently activated route using service ActivatedRoute
+
+
+  constructor(private mediaItemService: MediaItemService,
+    private activatedRoute: ActivatedRoute) { }
+
+  ngOnInit() {
+    // paramMap is an observable holding route params
+    // it can be subscribed to redirect based on medium
+    this.activatedRoute.paramMap.subscribe((paramMap) => {
+      let medium = paramMap.get('medium');
+      if (medium.toLowerCase() === 'all') {
+        medium = '';
+      }
+      this.getMediaItems(medium);
+    });
+  }
+
+
+----------------------
+
+apart from using router outlet we can also make use of router service to navigate in component
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private mediaItemService: MediaItemService,
+    @Inject(lookupListToken) public lookupLists,
+    private router: Router) {}
+
+  onSubmit(mediaItem) {
+    this.mediaItemService.add(mediaItem)
+      .subscribe(() => {
+        // navigate expects a link parameters array with data required for a routing operation
+        // first param is path and second param is route param
+        this.router.navigate(['/', mediaItem.medium]);
+      });
+  }
+
+
+----------------------
+
+
+BrowserModule is designed to be used in root module level, BrowserModule internally consumes CommonModule
+CommonModule is generally used for non-root modules with all of core modules, services and directives made available
+Remember to import child module into parent module
+for components part of child module, parent module routing to those components should be placed in routing file for the child module
+feature module help in grouping code and also help in providing greater control over the application code you deliver to the client
+
+
+----------------------
+
+Lazy loading: load what is not needed later than what is really needed, improves the application performance by phasing payload and quickening usability
+
+in app.module.ts - remove imports of modules that should be lazy-loaded
+
+in app.routing.ts - lazy load the feature module using the loadChildren property
+
+import { Routes, RouterModule } from '@angular/router';
+import { MediaItemListComponent } from './media-item-list.component';
+
+const appRoutes: Routes = [
+  {
+    path: 'add',
+    // to lazy load another module
+    // make sure to handle the routing in feature module accordingly
+    loadChildren: () => import('./new-item/new-item.module').then((m) => m.NewItemModule)
+  },
+  { path: ':medium', component: MediaItemListComponent },
+  { path: '', pathMatch: 'full', redirectTo: 'all' }
+];
+
+export const routing = RouterModule.forRoot(appRoutes);
+
+in the feature module's routes make sure you remove the match for add or replace it with default route match
+
+----------------------
+
+Angular offers modular styling abilities for templates at component level
+Their styling is controlled via ViewEncapsulation
+This setting can be configured per component in the component metadata
+The encapsulation property can be used to set it to the ViewEncapsulation enum used to configure the modular styling
+
+ViewEncapsulation.Native is deprecated and replaced by ShadowDom
+ViewEncapsulation.None tells angular not to do anything with CSS for the component. No separate styles will be used for the component and the styles pointed in component metadata will be added to global css
+ViewEncapsulation.ShadowDom mode will make use of browser's native ShadowDom implementation and not all browsers completely support it. ShadowDom implies the component's styles will not bleed out of the scope of the component into any other component in the document. This will restructure HTML markup.
+ViewEncapsulation.Emulated is used to tell angular to modularize component's CSS by renaming the selectors to scope them to the component's template markup. This is the default enum for which any component's encapsulation will be set to.
+
+
+----------------------
+
+ViewEncapsulation.Emulated
+
+Angular shims the CSS for each component as part of pre-proccessing. The CSS is modified and placed under a style tag (under head tag) for each component. Angular adds special attributes to CSS selectors for the components to map selector with the component.
+
+component selectors will get an nghost attribute added in view
+and the html tags in the template of these elements will get an ngcontent attribute added in view
+those attributes are compiled outputs and need not be worried about
+
+:host pseudo class selector is used to apply CSS for custom html tags which can be the component selectors
+
+      :host {
+        display: block;
+        margin-bottom: 20px;
+      }
+
+:host-context pseudo class selector will look for an ancestor with matching css selector and enforce the mentioned css selector the required styles
+
+      :host-context(.medium-movies) span {
+        background-color: #53ace4;
+      }
+      :host-context(.medium-series) span {
+        background-color: #45bf94;
+      }
+
+
+----------------------
+
+ViewEncapsulation.None
+
+angular uses styles.css in root folder
+those styles will not be shimmed
+
+----------------------
+----------------------
+----------------------
+----------------------
+----------------------
+ 
+
